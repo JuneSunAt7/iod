@@ -7,6 +7,8 @@ import (
 	"strings"
 )
 
+// main runs an interactive shell allowing the user to list the files and directories in
+// their current directory, change directories, create new files, delete files, and quit.
 func main() {
 	currentDir, err := os.Getwd()
 	if err != nil {
