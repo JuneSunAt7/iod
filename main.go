@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"atomicgo.dev/keyboard/keys"
+	"github.com/pterm/pterm"
 )
 
 // main runs an interactive shell allowing the user to list the files and directories in
@@ -12,35 +14,37 @@ import (
 func main() {
 	currentDir, err := os.Getwd()
 	if err != nil {
-		fmt.Println("Error getting current directory:", err)
+		pterm.Error.Println("Error getting current directory:", err)
 		return
 	}
+	var options []string
+
+	options = append(options, "1. List files and dirs")
+	options = append(options, "2. Change directory")
+	options = append(options, "3. Create new file")
+	options = append(options, "4. Delete file")
+	options = append(options, "5. Quit")
+
+	pterm.FgCyan.Printf("Current directory: %s\n", currentDir)
+	printer := pterm.DefaultInteractiveMultiselect.WithOptions(options)
+	printer.Filter = false
+	printer.TextStyle.Add(*pterm.NewStyle(pterm.FgGreen))
+	printer.KeyConfirm = keys.Enter
 
 	for {
-		fmt.Printf("Current directory: %s\n", currentDir)
-		fmt.Println("1. List files and dirs")
-		fmt.Println("2. Change directory")
-		fmt.Println("3. Create new file")
-		fmt.Println("4. Delete file")
-		fmt.Println("5. Quit")
+		selectedOptions, _ := pterm.DefaultInteractiveSelect.WithOptions(options).Show()
 
-		var choice string
-		fmt.Print("Enter your choice: ")
-		fmt.Scanln(&choice)
-
-		switch choice {
-		case "1":
+		switch selectedOptions {
+		case "1. List files and dirs":
 			listFiles(currentDir)
-		case "2":
+		case "2. Change directory":
 			currentDir = changeDirectory(currentDir)
-		case "3":
+		case "3. Create new file":
 			createFile(currentDir)
-		case "4":
+		case "4. Delete file":
 			deleteFile(currentDir)
-		case "5":
+		case "5. Quit":
 			return
-		default:
-			fmt.Println("Invalid choice. Please try again.")
 		}
 	}
 }
@@ -48,17 +52,18 @@ func main() {
 func listFiles(dir string) {
 	files, err := os.ReadDir(dir)
 	if err != nil {
-		fmt.Println("Error listing files:", err)
+		pterm.Error.Println("Error listing files:", err)
 		return
 	}
 
 	for _, file := range files {
-		fmt.Println(file.Name())
+		pterm.FgMagenta.Println(file.Name())
 	}
 }
 
+
 func changeDirectory(currentDir string) string {
-	fmt.Print("Enter new directory: ")
+	pterm.FgCyan.Println("Enter new directory: ")
 	var newDir string
 	fmt.Scanln(&newDir)
 
@@ -71,7 +76,7 @@ func changeDirectory(currentDir string) string {
 	}
 
 	if _, err := os.Stat(newDir); os.IsNotExist(err) {
-		fmt.Println("Directory does not exist.")
+		pterm.Error.Println("Directory does not exist.")
 		return currentDir
 	}
 
@@ -79,18 +84,18 @@ func changeDirectory(currentDir string) string {
 }
 
 func createFile(dir string) {
-	fmt.Print("Enter file name: ")
+	pterm.FgCyan.Println("Enter file name: ")
 	var fileName string
 	fmt.Scanln(&fileName)
 
 	if _, err := os.Stat(filepath.Join(dir, fileName)); !os.IsNotExist(err) {
-		fmt.Println("File already exists.")
+		pterm.Warning.Println("File already exists.")
 		return
 	}
 
 	file, err := os.Create(filepath.Join(dir, fileName))
 	if err != nil {
-		fmt.Println("Error creating file:", err)
+		pterm.Error.Println("Error creating file:", err)
 		return
 	}
 
@@ -98,12 +103,12 @@ func createFile(dir string) {
 }
 
 func deleteFile(dir string) {
-	fmt.Print("Enter file name: ")
+	pterm.FgCyan.Println("Enter file name: ")
 	var fileName string
 	fmt.Scanln(&fileName)
 
 	if err := os.Remove(filepath.Join(dir, fileName)); err != nil {
-		fmt.Println("Error deleting file:", err)
+		pterm.Error.Println("Error deleting file:", err)
 		return
 	}
 }
