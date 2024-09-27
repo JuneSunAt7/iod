@@ -21,7 +21,8 @@ func main() {
 	options = append(options, "2. Change directory")
 	options = append(options, "3. Create new file")
 	options = append(options, "4. Delete file")
-	options = append(options, "5. Quit")
+	options = append(options, "5. List sorted files and dirs")
+	options = append(options, "6. Quit")
 
 	pterm.FgCyan.Printf("Current directory: %s\n", currentDir)
 	printer := pterm.DefaultInteractiveMultiselect.WithOptions(options)
@@ -41,7 +42,9 @@ func main() {
 			functions.CreateFile(currentDir)
 		case "4. Delete file":
 			functions.DeleteFile(currentDir)
-		case "5. Quit":
+		case "5. List sorted files and dirs":
+			functions.ListSortedFilesAndDirs(currentDir)
+		case "6. Quit":
 			return
 		}
 	}
