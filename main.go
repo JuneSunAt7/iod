@@ -43,7 +43,24 @@ func main() {
 		case "4. Delete file":
 			functions.DeleteFile(currentDir)
 		case "5. List sorted files and dirs":
-			functions.ListSortedFilesAndDirs(currentDir)
+			var sortBy []string
+
+			sortBy = append(sortBy, "1. Sort by name")
+			sortBy = append(sortBy, "2. Sort by change date")
+
+			printer := pterm.DefaultInteractiveMultiselect.WithOptions(sortBy)
+			printer.Filter = false
+			printer.TextStyle.Add(*pterm.NewStyle(pterm.FgGreen))
+			printer.KeyConfirm = keys.Enter
+
+			selectedOptions, _ := pterm.DefaultInteractiveSelect.WithOptions(sortBy).Show()
+
+			switch selectedOptions {
+			case "1. Sort by name":
+				functions.ListSortedFilesAndDirs(currentDir)
+			case "2. Sort by change date":
+				functions.ListSortedFilesAndDirsByChangeDate(currentDir)
+			}
 		case "6. Quit":
 			return
 		}
