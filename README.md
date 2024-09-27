@@ -1,3 +1,4 @@
 
 ## How it works
-![architecture](https://github.com/user-attachments/assets/f8dfdd50-e4f8-41bc-a505-0f3c8e03f85b)
+
+![architecture](https://github.com/user-attachments/assets/7ef11027-7efd-428e-bf03-33b59b5ee5f6)
