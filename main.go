@@ -5,6 +5,8 @@ import (
 	"atomicgo.dev/keyboard/keys"
 	"github.com/pterm/pterm"
 	"iod/functions"
+	"iod/crypto"
+
 )
 
 // main runs an interactive shell allowing the user to list the files and directories in
@@ -21,8 +23,12 @@ func main() {
 	options = append(options, "2. Change directory")
 	options = append(options, "3. Create new file")
 	options = append(options, "4. Delete file")
-	options = append(options, "5. List sorted files and dirs")
-	options = append(options, "6. Quit")
+	options = append(options, "5. Copy file")
+	options = append(options, "6. List sorted files and dirs")
+	options = append(options, "7. Open file (read-only mode)")
+	options = append(options, "8. AES encryption")
+	options = append(options, "9. Check security of file")
+	options = append(options, "10. Quit")
 
 	pterm.FgCyan.Printf("Current directory: %s\n", currentDir)
 	printer := pterm.DefaultInteractiveMultiselect.WithOptions(options)
@@ -38,11 +44,15 @@ func main() {
 			functions.ListFiles(currentDir)
 		case "2. Change directory":
 			currentDir = functions.ChangeDirectory(currentDir)
+			pterm.FgCyan.Printf("Current directory: %s\n", currentDir)
 		case "3. Create new file":
 			functions.CreateFile(currentDir)
 		case "4. Delete file":
 			functions.DeleteFile(currentDir)
-		case "5. List sorted files and dirs":
+		case "5. Copy file":
+			functions.CopyFile(currentDir)
+
+		case "6. List sorted files and dirs":
 			var sortBy []string
 
 			sortBy = append(sortBy, "1. Sort by name")
@@ -61,7 +71,35 @@ func main() {
 			case "2. Sort by change date":
 				functions.ListSortedFilesAndDirsByChangeDate(currentDir)
 			}
-		case "6. Quit":
+		case "7. Open file (read-only mode)":
+			functions.OpenFile(currentDir)
+
+		case "8. AES encryption":
+			key, err := os.Hostname() 
+			if err != nil {
+				pterm.Error.Println("Error getting key:", err)
+				return
+			}
+			
+			var encryptionOptions []string
+
+			encryptionOptions = append(encryptionOptions, "1. Encrypt file")
+			encryptionOptions = append(encryptionOptions, "2. Decrypt file")
+
+			printer := pterm.DefaultInteractiveMultiselect.WithOptions(encryptionOptions)
+			printer.Filter = false
+			printer.TextStyle.Add(*pterm.NewStyle(pterm.FgGreen))
+			printer.KeyConfirm = keys.Enter
+
+			selectedOptions, _ := pterm.DefaultInteractiveSelect.WithOptions(encryptionOptions).Show()
+
+			switch selectedOptions {
+			case "1. Encrypt file":
+				crypto.EncryptFile(currentDir, key+"1")
+			case "2. Decrypt file":
+				crypto.DecryptFile(currentDir, key+"1")
+			}
+		case "10. Quit":
 			return
 		}
 	}

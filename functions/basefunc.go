@@ -5,6 +5,7 @@ import(
 	"path/filepath"
 	"strings"
 	"github.com/pterm/pterm"
+	"io"
 )
 func ListFiles(dir string) {
 	files, err := os.ReadDir(dir)
@@ -66,6 +67,41 @@ func DeleteFile(dir string) {
 
 	if err := os.Remove(filepath.Join(dir, fileName)); err != nil {
 		pterm.Error.Println("Error deleting file:", err)
+		return
+	}
+}
+func CopyFile(dir string) {
+	pterm.FgCyan.Println("Enter file name: ")
+	var fileName string
+	fmt.Scanln(&fileName)
+
+	if _, err := os.Stat(filepath.Join(dir, fileName)); os.IsNotExist(err) {
+		pterm.Error.Println("File does not exist.")
+		return
+	}
+
+	file, err := os.Open(filepath.Join(dir, fileName))
+	if err != nil {
+		pterm.Error.Println("Error opening file:", err)
+		return
+	}
+
+	defer file.Close()
+
+	pterm.FgCyan.Println("Enter new file name: ")
+	var newFileName string
+	fmt.Scanln(&newFileName)
+
+	newFile, err := os.Create(filepath.Join(dir, newFileName))
+	if err != nil {
+		pterm.Error.Println("Error creating file:", err)
+		return
+	}
+
+	defer newFile.Close()
+
+	if _, err := io.Copy(newFile, file); err != nil {
+		pterm.Error.Println("Error copying file:", err)
 		return
 	}
 }
