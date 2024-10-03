@@ -75,12 +75,7 @@ func main() {
 			functions.OpenFile(currentDir)
 
 		case "8. AES encryption":
-			key, err := os.Hostname() 
-			if err != nil {
-				pterm.Error.Println("Error getting key:", err)
-				return
-			}
-			
+
 			var encryptionOptions []string
 
 			encryptionOptions = append(encryptionOptions, "1. Encrypt file")
@@ -95,9 +90,12 @@ func main() {
 
 			switch selectedOptions {
 			case "1. Encrypt file":
-				crypto.EncryptFile(currentDir, key+"1")
+				key := crypto.GenerateKey()
+				crypto.SaveKeyToRegedit(string(key))
+				crypto.EncryptFileTUI(currentDir, key)
 			case "2. Decrypt file":
-				crypto.DecryptFile(currentDir, key+"1")
+				readKey := crypto.ReadKeyFromRegedit()
+				crypto.DecryptFileTUI(currentDir, readKey)
 			}
 		case "10. Quit":
 			return

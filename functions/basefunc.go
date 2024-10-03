@@ -58,6 +58,8 @@ func CreateFile(dir string) {
 	}
 
 	defer file.Close()
+
+	pterm.Success.Println("File created successfully.")
 }
 
 func DeleteFile(dir string) {
@@ -69,6 +71,8 @@ func DeleteFile(dir string) {
 		pterm.Error.Println("Error deleting file:", err)
 		return
 	}
+
+	pterm.Success.Println("File deleted successfully.")
 }
 func CopyFile(dir string) {
 	pterm.FgCyan.Println("Enter file name: ")
@@ -104,4 +108,6 @@ func CopyFile(dir string) {
 		pterm.Error.Println("Error copying file:", err)
 		return
 	}
+
+	pterm.Success.Println("File copied successfully.")
 }
