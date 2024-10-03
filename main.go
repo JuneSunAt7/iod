@@ -27,7 +27,7 @@ func main() {
 	options = append(options, "6. List sorted files and dirs")
 	options = append(options, "7. Open file (read-only mode)")
 	options = append(options, "8. AES encryption")
-	options = append(options, "9. Check security of file")
+	options = append(options, "9. Find file in computer with pattern")
 	options = append(options, "10. Quit")
 
 	pterm.FgCyan.Printf("Current directory: %s\n", currentDir)
@@ -73,7 +73,6 @@ func main() {
 			}
 		case "7. Open file (read-only mode)":
 			functions.OpenFile(currentDir)
-
 		case "8. AES encryption":
 
 			var encryptionOptions []string
@@ -97,6 +96,9 @@ func main() {
 				readKey := crypto.ReadKeyFromRegedit()
 				crypto.DecryptFileTUI(currentDir, readKey)
 			}
+
+		case "9. Find file in computer with pattern":
+			functions.GlobalFinderFile()
 		case "10. Quit":
 			return
 		}
