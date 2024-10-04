@@ -14,3 +14,7 @@
 ### <img src="https://github.com/user-attachments/assets/ef9f4d67-1403-4600-b0bf-498ed5955026" width="50px"> Create, delete and copy file
 
 ### <img src="https://github.com/user-attachments/assets/9b02217d-060c-4e48-8698-1399f477b742" width="50px"> Open file (read-only mode)
+
+# [Visual of programm](1004(1).gif)
+
+
