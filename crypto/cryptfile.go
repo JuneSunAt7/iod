@@ -10,8 +10,7 @@ import (
 	"path/filepath"
 	"github.com/pterm/pterm"
 	"fmt"
-    "encoding/hex"
-    "crypto/sha256"
+	"golang.org/x/sys/windows/registry"
 )
 // EncryptFile encrypts a file using the provided key
 func EncryptFile(key []byte, plaintext []byte) ([]byte, error) {
@@ -118,6 +117,7 @@ func DecryptFileTUI(dir string, key []byte) error {
 
 	plaintext, err := DecryptFile(key, ciphertext)
 	if err != nil {
+		pterm.Error.Println("Error decrypting file:", err)
 		return err
 	}
     DeleteUserOriginalFile(filepath.Join(dir, fileName))
@@ -133,27 +133,43 @@ func GenerateKey() []byte {
 	}
 	return key
 }
-func HashKey(key []byte) string {
-	hash := sha256.Sum256(key)
-	return hex.EncodeToString(hash[:])
-}
-func SaveKeyToRegedit(key string) {
-	// Save the key to the registry
-	if err := os.WriteFile("key.txt", []byte(key), 0644); err != nil {
-		pterm.Error.Println("Error saving key to registry:", err)
-		return
-	}
-}
-func ReadKeyFromRegedit() []byte {
-	// Read the key from the registry
-	keyBytes, err := os.ReadFile("key.txt")
-	if err != nil {
-		pterm.Error.Println("Error reading key from registry:", err)
-		return nil
-	}
-	return keyBytes
-}
+func CreateSettingsToRegedit(settingsName string, settingValue []byte) {
+    k, err := registry.OpenKey(registry.CURRENT_USER, `Software\iod`, registry.ALL_ACCESS)
+    if err != nil {
+        k, _, err = registry.CreateKey(registry.CURRENT_USER, `Software\iod`, registry.ALL_ACCESS)
+        if err != nil {
+            return
+        }
+    }
 
+    defer k.Close()
+
+    err = k.SetBinaryValue(settingsName, settingValue)
+    if err != nil {
+        return
+    }
+}
+func ReadRegistryValue(key registry.Key, subKey string, valueName string) ([]byte, error) {
+    k, err := registry.OpenKey(key, subKey, registry.QUERY_VALUE)
+    if err != nil {
+        return nil, err
+    }
+    defer k.Close()
+
+    val, _, err := k.GetBinaryValue(valueName)
+    if err != nil {
+        return nil, err
+    }
+
+    return val, nil
+}
+func CheckAviailableKey() bool {
+	_, err := ReadRegistryValue(registry.CURRENT_USER, `Software\iod`, "key")
+	if err != nil {
+		return false
+	}
+	return true
+}
 func DeleteUserOriginalFile(path string) {
 	if err := os.Remove(path); err != nil {
 		pterm.Error.Println("Error deleting file:", err)

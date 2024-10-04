@@ -1,6 +1,5 @@
 package functions
 
-// find file in computer
 import (
 	"path/filepath"
 	"github.com/pterm/pterm"

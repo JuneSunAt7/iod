@@ -1,12 +1,13 @@
 package main
 
 import (
+	"iod/crypto"
+	"iod/functions"
 	"os"
+
 	"atomicgo.dev/keyboard/keys"
 	"github.com/pterm/pterm"
-	"iod/functions"
-	"iod/crypto"
-
+	"golang.org/x/sys/windows/registry"
 )
 
 // main runs an interactive shell allowing the user to list the files and directories in
@@ -51,7 +52,6 @@ func main() {
 			functions.DeleteFile(currentDir)
 		case "5. Copy file":
 			functions.CopyFile(currentDir)
-
 		case "6. List sorted files and dirs":
 			var sortBy []string
 
@@ -89,11 +89,24 @@ func main() {
 
 			switch selectedOptions {
 			case "1. Encrypt file":
-				key := crypto.GenerateKey()
-				crypto.SaveKeyToRegedit(string(key))
+				if !crypto.CheckAviailableKey() {
+					crypto.CreateSettingsToRegedit("key", crypto.GenerateKey())
+					crypto.EncryptFileTUI(currentDir, crypto.GenerateKey())
+					return
+				}
+
+				key, err := crypto.ReadRegistryValue(registry.CURRENT_USER, "Software\\iod", "key")
+				if err != nil {
+					pterm.Error.Println("Error reading key:", err)
+					return
+				}
 				crypto.EncryptFileTUI(currentDir, key)
 			case "2. Decrypt file":
-				readKey := crypto.ReadKeyFromRegedit()
+				readKey, err := crypto.ReadRegistryValue(registry.CURRENT_USER, "Software\\iod", "key")
+				if err != nil {
+					pterm.Error.Println("Error reading key:", err)
+					return
+				}
 				crypto.DecryptFileTUI(currentDir, readKey)
 			}
 
